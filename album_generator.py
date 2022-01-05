@@ -8,10 +8,10 @@ from PIL import Image
 
 id = 'ff1b9dbff35a46f3b96b026bc3f36aaa'
 secret = '224f04a3e7d34b11b0d45c3165bf02b2'
-uri = 'http://collagify.com/verification'
+uri = 'http://localhost:8080/callback/'
 scope = 'user-library-read'
-unit_size = 100
-dimesions = (1600, 900)
+dimesions = (int(input('Enter desired width of the image: ')), int(input('Enter desired height of the image: ')))
+unit_size = int(input('Enter desired size of the album images: '))
 img_dir = 'album_covers/'
 img_file_ending = '.jpg'
 
@@ -61,7 +61,9 @@ def generate_wallpaper(url_set):
     img.save('wallpaper.jpg')
     img.show()
 
-sp = Spotify(auth_manager=SpotifyOAuth(client_id=id, client_secret=secret, redirect_uri=uri, scope=scope))
+auth_manager = SpotifyOAuth(client_id=id, client_secret=secret, redirect_uri=uri, scope=scope, username=input('Enter your username: '))
+sp = Spotify(auth_manager=auth_manager)
+
 
 all_album_urls = collect_urls_from_saved_albums(sp)
 
@@ -73,3 +75,13 @@ if (not exists(img_dir)):
 smaller_set = collect_and_download_subset(all_album_urls)
 
 generate_wallpaper(smaller_set)
+
+redo = input('Would you like to generate another wallpaper? (y/n) ')
+if (redo.strip().lower()[0] == 'y'):
+    new_smaller_set = set()
+    while len(new_smaller_set) < len(smaller_set):
+        temp = random.choice(list(smaller_set))
+        new_smaller_set.add(temp)
+        smaller_set.remove(temp)
+    smaller_set = new_smaller_set
+    generate_wallpaper(smaller_set)
